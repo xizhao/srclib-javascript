@@ -103,7 +103,7 @@ parser.command("depresolve")
       commonJSPackage.Dependencies.forEach(function(dep) {
         var i = commonJSPackage.Dependencies.indexOf(dep);
         resolutions[i] = {Raw: dep};
-        var spec = dep.name+"@"+dep.version;
+        var spec = dep.name + "@" + (dep.version || 'latest');
         npm.load(function(err, npm) {
           if (err) {
             console.error("npm.load failed: ", err);
@@ -116,25 +116,22 @@ parser.command("depresolve")
             } else if (!data || Object.keys(data).length == 0) {
               resolutions[i].Error = "no npm package found with spec " + JSON.stringify(spec);
             } else {
-              // Choose a version at random if it spits back a lot (TODO(sqs):
-              // this is stupid, we want the version that `npm install` would
-              // install, not just any random version, especially when
-              // version=='*').
-              var chooseVersion = Object.keys(data)[0];
-              var info = data[chooseVersion];
+              //Choose most recent version
+              var info = Object.keys(data).slice(-1)[0];
+              if (!info) {
+                var repoURL = "";
+                if (info.repository) {
+                  if (typeof info.repository == "string") repoURL = info.repository;
+                  else repoURL = info.repository.url;
+                }
 
-              var repoURL = "";
-              if (info.repository) {
-                if (typeof info.repository == "string") repoURL = info.repository;
-                else repoURL = info.repository.url;
+                resolutions[i].Target = {
+                 ToRepoCloneURL: repoURL,
+	          ToUnit: info.name,
+	          ToUnitType: "CommonJSPackage",
+	          ToVersionString: info.version
+                };
               }
-
-              resolutions[i].Target = {
-                ToRepoCloneURL: repoURL,
-	        ToUnit: info.name,
-	        ToUnitType: "CommonJSPackage",
-	        ToVersionString: info.version,
-              };
             }
 
             remaining--;
