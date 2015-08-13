@@ -161,8 +161,9 @@ parser.command("depresolve")
                 else repoURL = info.repository.url;
               }
 
+              // TODO: validate repoURL and if fails, set to default npm URL automatically
               resolutions[i].Target = {
-                ToRepoCloneURL: repoURL,
+                ToRepoCloneURL: repoURL || "https://www.npmjs.com/package/" + info.name,
 	        ToUnit: info.name,
 	        ToUnitType: "CommonJSPackage",
 	        ToVersionString: info.version,
