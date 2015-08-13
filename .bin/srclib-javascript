@@ -125,8 +125,7 @@ parser.command("depresolve")
         return;
       }
 
-      commonJSPackage.Dependencies.forEach(function(dep) {
-        var i = commonJSPackage.Dependencies.indexOf(dep);
+      commonJSPackage.Dependencies.forEach(function(dep, i) {
         resolutions[i] = {Raw: dep};
         var spec = dep.name+(dep.version ? "@"+dep.version : "");
         npm.load(function(err, npm) {
