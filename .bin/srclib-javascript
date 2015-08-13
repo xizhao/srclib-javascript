@@ -135,7 +135,7 @@ parser.command("depresolve")
             process.exit(1)
           }
 
-          npm.commands.view(["--silent", spec], function(err,data) {
+          npm.commands.view([spec], true, function(err,data) {
             if (hardcodedRepoURLs[spec]) {
               data = {"": {}}
               err = null
