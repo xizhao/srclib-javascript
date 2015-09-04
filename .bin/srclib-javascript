@@ -181,9 +181,7 @@ parser.command("depresolve")
   })
   .help("resolves dependencies of a CommonJS package");
 
-var hardcodedRepoURLs = {
-    "node": "https://github.com/joyent/node.git",
-};
+var hardcodedRepoURLs = {};
 
 parser.command("graph")
   .callback(function(opts) {
