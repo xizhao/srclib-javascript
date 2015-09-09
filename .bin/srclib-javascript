@@ -70,7 +70,6 @@ parser.command("scan-commonjs")
           if (deps) Object.keys(deps).forEach(function(name) { allDeps.push({name: name, version: deps[name]}); });
         }
         collectDeps(pkg.package.dependencies);
-        collectDeps(pkg.package.devDependencies);
 
         files = arrayUnique(pkg.libFiles.concat(pkg.testFiles).filter(function(f) { return fs.statSync(f).isFile(); }));
 
