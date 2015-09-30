@@ -65,12 +65,13 @@ parser.command("scan-commonjs")
       // convert from commonjs-findpkgs format to source unit
       var srcunits = pkgs.map(function(pkg) {
         // collect all deps
-        var allDeps = [{name: "node", "version": ""}];
+        //var allDeps = [{name: "node", "version": ""}];
+        allDeps = [];
         function collectDeps(deps) {
           if (deps) Object.keys(deps).forEach(function(name) { allDeps.push({name: name, version: deps[name]}); });
         }
         collectDeps(pkg.package.dependencies);
-        collectDeps(pkg.package.devDependencies);
+        //collectDeps(pkg.package.devDependencies);
 
         files = arrayUnique(pkg.libFiles.concat(pkg.testFiles).filter(function(f) { return fs.statSync(f).isFile(); }));
 
