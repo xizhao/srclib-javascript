@@ -8,13 +8,6 @@
       ]
     },
     {
-      "Subcmd": "graph",
-      "Op": "graph",
-      "SourceUnitTypes": [
-        "CommonJSPackage"
-      ]
-    },
-    {
       "Subcmd": "depresolve",
       "Op": "depresolve",
       "SourceUnitTypes": [
