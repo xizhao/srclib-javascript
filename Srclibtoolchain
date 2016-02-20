@@ -4,14 +4,8 @@
       "Subcmd": "scan-commonjs",
       "Op": "scan",
       "SourceUnitTypes": [
-        "CommonJSPackage"
-      ]
-    },
-    {
-      "Subcmd": "depresolve",
-      "Op": "depresolve",
-      "SourceUnitTypes": [
-        "CommonJSPackage"
+        "CommonJSPackage",
+        "BowerPackage"
       ]
     }
   ]

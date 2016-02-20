@@ -8,6 +8,20 @@ var npm = require("npm");
 var path = require("path");
 var execFile = require("child_process").execFile;
 var fs = require("fs");
+var find_bower = require('../lib/find_bower.js')
+
+function collectDeps(deps) {
+  var processed_deps = [];
+  deps = deps || [];
+  var keys = Object.keys(deps);
+  for(var i=0; i<keys.length; i++) {
+    processed_deps.push({
+      name: keys[i],
+      version: deps[keys[i]]
+    })
+  }
+  return processed_deps;
+}
 
 parser.command("scan-commonjs")
   .option("repo", {
@@ -18,9 +32,9 @@ parser.command("scan-commonjs")
   })
   .callback(function(opts) {
     // TODO(sqs): support ScanIgnore from repo Srcfile (pass to findpkgs ignore param)
-    findpkgs(".", ["node_modules"], function(err, pkgs) {
+    findpkgs(".", ["node_modules", "bower_components"], function scanNpmPackages(err, pkgs) {
       if (err) {
-        console.error("Scanning failed:", err);
+        console.error("Scanning for NPM packages failed:", err);
         process.exit(1);
       }
 
@@ -66,12 +80,6 @@ parser.command("scan-commonjs")
       var srcunits = pkgs.map(function(pkg) {
         // collect all deps
         //var allDeps = [{name: "node", "version": ""}];
-        allDeps = [];
-        function collectDeps(deps) {
-          if (deps) Object.keys(deps).forEach(function(name) { allDeps.push({name: name, version: deps[name]}); });
-        }
-        collectDeps(pkg.package.dependencies);
-        //collectDeps(pkg.package.devDependencies);
 
         files = arrayUnique(pkg.libFiles.concat(pkg.testFiles).filter(function(f) { return fs.statSync(f).isFile(); }));
 
@@ -80,23 +88,34 @@ parser.command("scan-commonjs")
           Type: "CommonJSPackage",
           Dir: pkg.dir,
           Files: files,
-          Dependencies: allDeps,
+          Dependencies: collectDeps(pkg.package.dependencies), // exclude devdeps
           Data: pkg.package,
           Ops: {depresolve: null, graph: null},
-          Config: {
-            npmInstall: !!process.env.IN_DOCKER_CONTAINER,
-            jsg: {
-              plugins: {
-                node: {
-                  coreModulesDir: process.env.NODEJS_CORE_MODULES_DIR || "$(JSG_DIR)/testdata/node_core_modules",
-                }
-              },
-            },
-          },
+          Config: {}
         };
       });
 
-      console.log(JSON.stringify(srcunits, null, 2));
+      find_bower('.', ["bower_components", "node_modules"], function(err, bower_pkgs) {
+        if (err) {
+          console.error("Scanning bower packages failed:", err);
+          process.exit(1);
+        }
+
+        for(var i=0; i<bower_pkgs.length; i++) {
+          srcunits.push({
+            Name: bower_pkgs[i].name,
+            Type: "BowerPackage",
+            Dir: path.dirname(bower_pkgs[i].path),
+            Files: [], // currently do not aggregate filenames
+            Dependencies: collectDeps(bower_pkgs[i].dependencies), // also exclude devDeps
+            Data: bower_pkgs[i],
+            Ops: {depresolve: null, graph: null},
+            Config: {}
+          });
+        }
+
+        console.log(JSON.stringify(srcunits, null, 2));
+      });
     });
   })
   .help("scan for CommonJS packages");
